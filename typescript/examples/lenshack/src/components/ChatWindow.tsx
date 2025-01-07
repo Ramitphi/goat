@@ -1,17 +1,17 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { viem } from "@goat-sdk/wallet-viem";
-import { createWalletClient, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { lens_testnet } from "../../chain";
+import { cn } from "@/lib/utils";
+import { createOpenAI } from "@ai-sdk/openai";
 import { getOnChainTools } from "@goat-sdk/adapter-vercel-ai";
 import { lens } from "@goat-sdk/plugin-lens";
+import { viem } from "@goat-sdk/wallet-viem";
 import { generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
-import { cn } from "@/lib/utils";
+import React, { useState } from "react";
+import { http, createWalletClient } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { lens_testnet } from "../../chain";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
 
 interface ChatMessage {
     id: number;
@@ -34,9 +34,7 @@ const ChatWindow = () => {
         },
     ]);
 
-    const account = privateKeyToAccount(
-        `0x${process.env.NEXT_PUBLIC_WALLET_PRIVATE_KEY}`
-    );
+    const account = privateKeyToAccount(`0x${process.env.NEXT_PUBLIC_WALLET_PRIVATE_KEY}`);
 
     const walletClient = createWalletClient({
         account: account,
@@ -45,10 +43,7 @@ const ChatWindow = () => {
     });
 
     const sendMessageToAgent = async () => {
-        setMessages((prev) => [
-            ...prev,
-            { id: prev.length, msg: userInput, isMe: true },
-        ]);
+        setMessages((prev) => [...prev, { id: prev.length, msg: userInput, isMe: true }]);
 
         setUserInput("");
 
@@ -77,10 +72,7 @@ const ChatWindow = () => {
 
             console.log({ aiResult: result.text }); // ai agent chat
 
-            setMessages((prev) => [
-                ...prev,
-                { id: prev.length, msg: result.text, isMe: false },
-            ]);
+            setMessages((prev) => [...prev, { id: prev.length, msg: result.text, isMe: false }]);
         } catch (error) {
             console.log({ error });
 
@@ -108,7 +100,7 @@ const ChatWindow = () => {
                         key={id}
                         className={cn(
                             "bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2",
-                            isMe && "bg-black ml-auto"
+                            isMe && "bg-black ml-auto",
                         )}
                     >
                         {msg}
