@@ -25,9 +25,7 @@ export class LensService {
         const match = link.match(regex);
 
         if (!match) {
-            throw new Error(
-                `Please submit a valid link. Submitted link: ${link}`
-            );
+            throw new Error(`Please submit a valid link. Submitted link: ${link}`);
         }
 
         let postOwner: z.infer<typeof GetPostOwnerResponseSchema>;
@@ -57,13 +55,9 @@ export class LensService {
                 }),
             });
 
-            postOwner = (await response.json()) as z.infer<
-                typeof GetPostOwnerResponseSchema
-            >;
+            postOwner = (await response.json()) as z.infer<typeof GetPostOwnerResponseSchema>;
         } catch (error) {
-            throw new Error(
-                `Failed to get NFT collection statistics: ${error}`
-            );
+            throw new Error(`Failed to get NFT collection statistics: ${error}`);
         }
 
         return postOwner;
@@ -72,10 +66,7 @@ export class LensService {
     @Tool({
         description: "Tip this creator with an amount of grass token",
     })
-    async tipTheCreator(
-        walletClient: EVMWalletClient,
-        parameters: TipParameters
-    ) {
+    async tipTheCreator(walletClient: EVMWalletClient, parameters: TipParameters) {
         try {
             const to = await walletClient.resolveAddress(parameters.to);
             const hash = await walletClient.sendTransaction({
@@ -114,9 +105,7 @@ export class LensService {
                     },
                 }),
             });
-            profileId = (await response.json()) as z.infer<
-                typeof GetProfileIdResponseSchema
-            >;
+            profileId = (await response.json()) as z.infer<typeof GetProfileIdResponseSchema>;
         } catch (error) {
             throw Error(`Failed to transfer: ${error}`);
         }
@@ -154,9 +143,7 @@ export class LensService {
                 }),
             });
 
-            recommendation = (await response.json()) as z.infer<
-                typeof GetProfileRecommendationsSchema
-            >;
+            recommendation = (await response.json()) as z.infer<typeof GetProfileRecommendationsSchema>;
         } catch (error) {
             throw Error(`Failed to transfer: ${error}`);
         }

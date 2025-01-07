@@ -93,32 +93,45 @@ const ChatWindow = () => {
     };
 
     return (
-        <div className="h-full w-1/2 min-w-[600px] bg-white rounded-lg p-2 flex flex-col">
-            <div className="flex-1">
+        <div className="relative h-full w-1/2 min-w-[600px] bg-white rounded-lg p-2 flex flex-col overflow-auto">
+            <div className="flex-1 h-96">
                 {messages.map(({ id, isMe, msg }) => (
                     <div
                         key={id}
                         className={cn(
-                            "bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2",
+                            "bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2 max-w-96",
                             isMe && "bg-black ml-auto",
                         )}
                     >
                         {msg}
                     </div>
                 ))}
-
                 {isLoading && (
                     <div className="bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2">
                         Thinking...
                     </div>
                 )}
+                {/* {Array.from({ length: 50 }, (_, index) => (
+                    <div
+                        key={`yo-${
+                            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                            index
+                        }`}
+                        className="bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2"
+                    >
+                        Thinking...
+                    </div>
+                ))}{" "}
+                <div className="bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2">
+                    meh
+                </div> */}
             </div>
             <form
                 onSubmit={(e) => {
                     e.preventDefault();
                     sendMessageToAgent();
                 }}
-                className="flex gap-2"
+                className="fixed w-1/2 min-w-[600px] left-1/2 -translate-x-1/2 bottom-6 flex gap-2 bg-white p-1 rounded"
             >
                 <Input
                     placeholder="Type your prompt here"
