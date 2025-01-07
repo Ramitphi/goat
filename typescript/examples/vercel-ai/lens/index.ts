@@ -29,7 +29,7 @@ const walletClient = createWalletClient({
         model: openai("gpt-4o"),
         tools: tools,
         maxSteps: 5,
-        prompt: "Get similar profile related to creator of post https://hey.xyz/posts/0x033026-0x0580",
+        prompt: "tip 0.01 token to creator of this post https://hey.xyz/posts/0x033026-0x0580",
     });
 
     console.log(result.text);
