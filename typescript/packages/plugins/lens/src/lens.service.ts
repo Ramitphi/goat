@@ -2,7 +2,16 @@ import { Tool } from "@goat-sdk/core";
 import { EVMWalletClient } from "@goat-sdk/wallet-evm";
 
 import { z } from "zod";
-import { GetPostOwnerParameterSchema, GetPostOwnerResponseSchema, TipParameters } from "./parameters";
+import {
+    FormatUrlParameterSchema,
+    GetPostOwnerParameterSchema,
+    GetPostOwnerResponseSchema,
+    GetProfileIdParameterSchema,
+    GetProfileIdResponseSchema,
+    GetProfileRecommendationsSchema,
+    GetRecommendationParameterSchema,
+    TipParameters,
+} from "./parameters";
 
 import { parseEther } from "viem";
 
@@ -65,6 +74,89 @@ export class LensService {
                 value: parseEther(parameters.amount),
             });
             return hash.hash;
+        } catch (error) {
+            throw Error(`Failed to transfer: ${error}`);
+        }
+    }
+
+    @Tool({
+        description: "Get the profileId of creator based on their address",
+    })
+    async getProfileId(parameters: GetProfileIdParameterSchema) {
+        let profileId: z.infer<typeof GetProfileIdResponseSchema>;
+
+        try {
+            const response = await fetch("https://api-v2.lens.dev/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: `query DefaultProfile($request: DefaultProfileRequest!) {
+                        defaultProfile(request: $request) {
+                          id
+                        }
+                      }`,
+                    variables: {
+                        request: {
+                            for: parameters.address,
+                        },
+                    },
+                }),
+            });
+            profileId = (await response.json()) as z.infer<typeof GetProfileIdResponseSchema>;
+        } catch (error) {
+            throw Error(`Failed to transfer: ${error}`);
+        }
+        return profileId;
+    }
+
+    @Tool({
+        description: "Get similar creators for given profileId",
+    })
+    async getRecommendations(parameters: GetRecommendationParameterSchema) {
+        let recommendation: z.infer<typeof GetProfileRecommendationsSchema>;
+
+        try {
+            const response = await fetch("https://api-v2.lens.dev/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    query: `query ProfileRecommendations($request: ProfileRecommendationsRequest!) {
+                        profileRecommendations(request: $request) {
+                          items {
+                            id
+                            handle {
+                              fullHandle
+                            }
+                          }
+                        }
+                      }`,
+                    variables: {
+                        request: {
+                            for: parameters.profileId,
+                        },
+                    },
+                }),
+            });
+
+            recommendation = (await response.json()) as z.infer<typeof GetProfileRecommendationsSchema>;
+        } catch (error) {
+            throw Error(`Failed to transfer: ${error}`);
+        }
+        return recommendation;
+    }
+
+    @Tool({
+        description: "Format the lens handle with url",
+    })
+    async formatTheHandle(parameters: FormatUrlParameterSchema) {
+        try {
+            const baseUrl = "https://hey.xyz/u/";
+            const username = parameters.handle.split("/")[1];
+            return `${baseUrl}${username}`;
         } catch (error) {
             throw Error(`Failed to transfer: ${error}`);
         }

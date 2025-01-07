@@ -1,6 +1,6 @@
 import React from "react";
 
-const ChatInput = () => {
+const ChatInput: React.FC<{ inputText: string }> = ({ inputText }) => {
     return <div>ChatInput</div>;
 };
 

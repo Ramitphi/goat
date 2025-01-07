@@ -11,13 +11,7 @@
 // import { privateKeyToAccount } from "viem/accounts";
 // import { lens_testnet } from "../../../chain";
 
-// type Props = {
-//     userInput: string;
-// };
-
-// // TOODODODO
-
-// const Chat: FC<{ gg: Props }> = ({ gg }) => {
+// const Chat: FC<{ userInput: string }> = ({ userInput }) => {
 //     require("dotenv").config();
 
 //     const account = privateKeyToAccount(`0x${process.env.WALLET_PRIVATE_KEY}`);
@@ -39,7 +33,7 @@
 //             model: openai("gpt-4o"),
 //             tools: tools,
 //             maxSteps: 5,
-//             prompt: gg.userInput,
+//             prompt: userInput,
 
 //             // userr input
 //         });
