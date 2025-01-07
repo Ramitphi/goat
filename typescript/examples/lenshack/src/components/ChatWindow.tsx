@@ -1,0 +1,143 @@
+"use client";
+
+import React, { useState } from "react";
+import { Button } from "./ui/button";
+import { Input } from "./ui/input";
+import { viem } from "@goat-sdk/wallet-viem";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { lens_testnet } from "../../chain";
+import { getOnChainTools } from "@goat-sdk/adapter-vercel-ai";
+import { lens } from "@goat-sdk/plugin-lens";
+import { generateText } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { cn } from "@/lib/utils";
+
+interface ChatMessage {
+    id: number;
+    msg: string;
+    isMe: boolean;
+}
+
+const openai = createOpenAI({
+    apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
+});
+
+const ChatWindow = () => {
+    const [userInput, setUserInput] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [messages, setMessages] = useState<ChatMessage[]>([
+        {
+            id: 0,
+            msg: "Welcome to Lens Agent",
+            isMe: false,
+        },
+    ]);
+
+    const account = privateKeyToAccount(
+        `0x${process.env.NEXT_PUBLIC_WALLET_PRIVATE_KEY}`
+    );
+
+    const walletClient = createWalletClient({
+        account: account,
+        transport: http(`${process.env.NEXT_PUBLIC_ALCHEMY_LENS_RPC_URL}`),
+        chain: lens_testnet,
+    });
+
+    const sendMessageToAgent = async () => {
+        setMessages((prev) => [
+            ...prev,
+            { id: prev.length, msg: userInput, isMe: true },
+        ]);
+
+        setUserInput("");
+
+        setIsLoading(true);
+        try {
+            const tools = await getOnChainTools({
+                wallet: viem(walletClient),
+                plugins: [lens()],
+            });
+
+            const result = await generateText({
+                model: openai("gpt-4o"),
+                tools: tools,
+                maxSteps: 5,
+                prompt: userInput,
+                // messages: messages.map(({ msg, isMe }) => ({
+                //     role: isMe ? "user" : "system",
+                //     content: [
+                //         {
+                //             type: "text",
+                //             text: msg,
+                //         },
+                //     ],
+                // })),
+            });
+
+            console.log({ aiResult: result.text }); // ai agent chat
+
+            setMessages((prev) => [
+                ...prev,
+                { id: prev.length, msg: result.text, isMe: false },
+            ]);
+        } catch (error) {
+            console.log({ error });
+
+            const msg = (error as { message?: string })?.message;
+            if (msg) {
+                setMessages((prev) => [
+                    ...prev,
+                    {
+                        id: prev.length,
+                        msg,
+                        isMe: false,
+                    },
+                ]);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="h-full w-1/2 min-w-[600px] bg-white rounded-lg p-2 flex flex-col">
+            <div className="flex-1">
+                {messages.map(({ id, isMe, msg }) => (
+                    <div
+                        key={id}
+                        className={cn(
+                            "bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2",
+                            isMe && "bg-black ml-auto"
+                        )}
+                    >
+                        {msg}
+                    </div>
+                ))}
+
+                {isLoading && (
+                    <div className="bg-green-500 text-white h-fit w-fit px-3 py-2 text-sm rounded-md my-2">
+                        Thinking...
+                    </div>
+                )}
+            </div>
+            <form
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessageToAgent();
+                }}
+                className="flex gap-2"
+            >
+                <Input
+                    placeholder="Type your prompt here"
+                    className="text-black"
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                />
+                <Button type="submit">Enter</Button>
+            </form>
+        </div>
+    );
+};
+
+export default ChatWindow;
